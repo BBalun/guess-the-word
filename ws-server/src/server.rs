@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use tokio::sync::{Mutex, RwLock};
 
-use crate::{game::Game};
+use crate::game::Game;
 
 pub struct Server {
     pub games: Arc<RwLock<HashMap<String, Arc<Mutex<Game>>>>>,

@@ -36,6 +36,7 @@ export default function JoinGame({ socket }: { socket: WebSocket }) {
             id="name"
             value={name}
             onChange={(e: any) => setName(e.target.value)}
+            required
           />
 
           <label htmlFor="gameId">Game Id:</label>
@@ -45,6 +46,7 @@ export default function JoinGame({ socket }: { socket: WebSocket }) {
             id="gameId"
             value={gameId}
             onChange={(e: any) => setGameId(e.target.value)}
+            required
           />
 
           <Button colorScheme="blue" type="submit">

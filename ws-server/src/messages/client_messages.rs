@@ -16,6 +16,8 @@ pub enum ClientMessage {
 #[serde(rename_all = "camelCase")]
 pub struct CreateGameData {
     pub player_name: String,
+    pub number_of_rounds: u32,
+    pub round_length: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

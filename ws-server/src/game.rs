@@ -1,14 +1,15 @@
+use async_recursion::async_recursion;
 use std::{
     collections::{HashMap, HashSet},
     sync::{Arc, Weak},
 };
-use async_recursion::async_recursion;
 
 use rand::prelude::SliceRandom;
 
 use crate::{
     messages::{server_messages::*, DrawPixelData},
-    player::Player, server::Server,
+    player::Player,
+    server::Server,
 };
 
 pub struct Game {
@@ -22,6 +23,7 @@ pub struct Game {
     pub words: Arc<Vec<String>>,
     pub current_word: String,
     server: Weak<Server>,
+    pub round_length: u64,
 }
 
 pub enum GameStatus {
@@ -31,7 +33,14 @@ pub enum GameStatus {
 }
 
 impl Game {
-    pub fn new(id: String, turns: u32, mut owner: Player, words: Arc<Vec<String>>, server: Weak<Server>) -> Game {
+    pub fn new(
+        id: String,
+        turns: u32,
+        mut owner: Player,
+        words: Arc<Vec<String>>,
+        server: Weak<Server>,
+        round_length: u64,
+    ) -> Game {
         let mut players = HashMap::new();
         owner.is_owner = true;
         players.insert(owner.name.clone(), owner);
@@ -46,6 +55,7 @@ impl Game {
             words,
             current_word: String::new(),
             server,
+            round_length,
         }
     }
 
@@ -131,7 +141,7 @@ impl Game {
             }),
             &current_player,
         );
-        self.start_timeout(10).await;
+        self.start_timeout(self.round_length).await;
     }
 
     pub async fn start_timeout(&self, timeout: u64) {
@@ -140,7 +150,7 @@ impl Game {
                 let game_id = self.id.clone();
                 tokio::spawn(async move {
                     tokio::time::sleep(tokio::time::Duration::from_secs(timeout)).await;
-                    if let Some(game) = server.find_game(&game_id).await { 
+                    if let Some(game) = server.find_game(&game_id).await {
                         let mut game = game.lock().await;
                         game.timeout(current_round).await;
                     }

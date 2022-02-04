@@ -24,7 +24,7 @@ export default function ChatInput({ socket }: { socket: WebSocket }) {
         setData("");
       }}
     >
-      <Input type="text" value={data} onChange={(e: any) => setData(e.target.value)} />
+      <Input type="text" value={data} onChange={(e: any) => setData(e.target.value)} required />
       <Button type="submit">Send</Button>
     </Stack>
   );

@@ -27,12 +27,12 @@ async fn main() {
     let routes = ws_route.with(warp::cors().allow_any_origin());
 
     println!("Starting server");
-    warp::serve(routes)
-        .run(([127, 0, 0, 1], 8000))
-        .await;
+    warp::serve(routes).run(([127, 0, 0, 1], 8000)).await;
 }
 
-fn with_server(server: Arc<Server>) -> impl Filter<Extract = (Arc<Server>,), Error = Infallible> + Clone {
+fn with_server(
+    server: Arc<Server>,
+) -> impl Filter<Extract = (Arc<Server>,), Error = Infallible> + Clone {
     warp::any().map(move || server.clone())
 }
 

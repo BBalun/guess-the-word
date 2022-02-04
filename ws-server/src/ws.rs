@@ -7,9 +7,10 @@ use uuid::Uuid;
 use warp::ws::{Message, WebSocket};
 
 use crate::{
+    game::Game,
     messages::{client_messages::*, server_messages::*},
     player::Player,
-    server::Server, game::Game,
+    server::Server,
 };
 
 async fn forward(
@@ -22,6 +23,7 @@ async fn forward(
 }
 
 pub async fn client_connection(ws: WebSocket, server: Arc<Server>) {
+    println!("new websocket connection established");
     // client_sink -> client_stream -> ws_sink
     let (ws_sink, mut ws_stream) = ws.split();
     let (client_sink, client_stream) = mpsc::unbounded_channel();
@@ -43,12 +45,21 @@ pub async fn client_connection(ws: WebSocket, server: Arc<Server>) {
             };
 
             match client_msg {
-                ClientMessage::CreateGame(CreateGameData { player_name }) => {
-                    // TODO: rounds (either remove or add ability to change number of rounds)
-                    let rounds = 3 as u32;
+                ClientMessage::CreateGame(CreateGameData {
+                    player_name,
+                    number_of_rounds,
+                    round_length,
+                }) => {
                     let owner = Player::new(player_name, client_sink, true);
                     let game_id = Uuid::new_v4().to_string();
-                    let new_game = Arc::new(Mutex::new(Game::new(game_id.clone(), rounds, owner.clone(), server.get_words(), Arc::downgrade(&server))));
+                    let new_game = Arc::new(Mutex::new(Game::new(
+                        game_id.clone(),
+                        number_of_rounds,
+                        owner.clone(),
+                        server.get_words(),
+                        Arc::downgrade(&server),
+                        round_length,
+                    )));
                     server.add_game(new_game.clone()).await;
                     owner.send(ServerMessage::CreateGameResponse(CreateGameResponseData {
                         game_id: game_id.clone(),
@@ -84,7 +95,7 @@ pub async fn client_connection(ws: WebSocket, server: Arc<Server>) {
                         }
                     }
                 }
-                _ => {}
+                _ => { }
             }
         }
     }
@@ -129,9 +140,7 @@ pub async fn client_connection(ws: WebSocket, server: Arc<Server>) {
                 }
                 _ => {}
             };
-        } else if msg.is_close() {
-            println!("Client disconnected...");
-        }
+        } 
     }
 
     println!("connection closed");

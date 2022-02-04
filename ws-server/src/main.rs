@@ -1,4 +1,4 @@
-use std::convert::Infallible;
+use std::{convert::Infallible, sync::Arc};
 
 use tokio::{fs::File, io::AsyncBufReadExt, io::BufReader};
 use warp::{Filter, Rejection};
@@ -16,8 +16,8 @@ type Result<T> = std::result::Result<T, Rejection>;
 
 #[tokio::main]
 async fn main() {
-    let words = read_words(r"C:\Users\Beny\Desktop\pv281\testing\warp-ws\words.txt").await;
-    let server = Server::new(words);
+    let words = read_words(r"C:\Users\Beny\Desktop\pv281\pv281-project\ws-server\words.txt").await;
+    let server = Arc::new(Server::new(words));
 
     let ws_route = warp::path("ws")
         .and(warp::ws())
@@ -40,7 +40,7 @@ async fn main() {
         .await;
 }
 
-fn with_server(server: Server) -> impl Filter<Extract = (Server,), Error = Infallible> + Clone {
+fn with_server(server: Arc<Server>) -> impl Filter<Extract = (Arc<Server>,), Error = Infallible> + Clone {
     warp::any().map(move || server.clone())
 }
 

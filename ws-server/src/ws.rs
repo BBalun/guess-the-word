@@ -1,12 +1,15 @@
+use std::sync::Arc;
+
 use futures::{stream::SplitSink, SinkExt, StreamExt};
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, Mutex};
 use tokio_stream::wrappers::UnboundedReceiverStream;
+use uuid::Uuid;
 use warp::ws::{Message, WebSocket};
 
 use crate::{
     messages::{client_messages::*, server_messages::*},
     player::Player,
-    server::Server,
+    server::Server, game::Game,
 };
 
 async fn forward(
@@ -18,7 +21,7 @@ async fn forward(
     }
 }
 
-pub async fn client_connection(ws: WebSocket, server: Server) {
+pub async fn client_connection(ws: WebSocket, server: Arc<Server>) {
     // client_sink -> client_stream -> ws_sink
     let (ws_sink, mut ws_stream) = ws.split();
     let (client_sink, client_stream) = mpsc::unbounded_channel();
@@ -41,15 +44,20 @@ pub async fn client_connection(ws: WebSocket, server: Server) {
 
             match client_msg {
                 ClientMessage::CreateGame(CreateGameData { player_name }) => {
-                    let owner = Player::new(player_name, client_sink, true);
                     // TODO: rounds (either remove or add ability to change number of rounds)
-                    let game_id = server.create_game(owner.clone(), 3).await;
+                    let rounds = 3 as u32;
+                    let owner = Player::new(player_name, client_sink, true);
+                    let game_id = Uuid::new_v4().to_string();
+                    let new_game = Game::new(game_id.clone(), rounds, owner.clone(), server.get_words(), Arc::downgrade(&server));
+                    let new_game = Arc::new(Mutex::new(new_game));
+                    server.add_game(new_game.clone()).await;
+                    // let game_id = server.create_game(owner.clone(), 3).await;
                     owner.send(ServerMessage::CreateGameResponse(CreateGameResponseData {
                         game_id: game_id.clone(),
                         player_name: owner.name.clone(),
                     }));
                     player = Some(owner);
-                    game = Some(server.find_game(&game_id).await.unwrap());
+                    game = Some(new_game);
                     break;
                 }
                 ClientMessage::JoinGame(JoinGameData {

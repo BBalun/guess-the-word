@@ -1,3 +1,4 @@
+import { Button, Input, Stack } from "@chakra-ui/react";
 import { useState } from "react";
 
 function sendMessage(socket: WebSocket, msg: string) {
@@ -15,15 +16,16 @@ export default function ChatInput({ socket }: { socket: WebSocket }) {
   const [data, setData] = useState("");
 
   return (
-    <form
-      onSubmit={(e) => {
+    <Stack
+      as="form"
+      onSubmit={(e: any) => {
         e.preventDefault();
         sendMessage(socket, data);
         setData("");
       }}
     >
-      <input type="text" value={data} onChange={(e) => setData(e.target.value)} />
-      <button type="submit">Send</button>
-    </form>
+      <Input type="text" value={data} onChange={(e: any) => setData(e.target.value)} />
+      <Button type="submit">Send</Button>
+    </Stack>
   );
 }

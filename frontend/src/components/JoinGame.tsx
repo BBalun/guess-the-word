@@ -1,3 +1,4 @@
+import { Box, Button, Center, Heading, Input, Stack, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 
 function joinGame(socket: WebSocket, playerName: string, gameId: string) {
@@ -22,17 +23,35 @@ export default function JoinGame({ socket }: { socket: WebSocket }) {
   }
 
   return (
-    <>
-      <h1>Join game</h1>
-      <form onSubmit={onSubmit}>
-        <label htmlFor="name">Player name:</label>
-        <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} />
+    <Center>
+      <VStack>
+        <Box>
+          <Heading>Join game</Heading>
+        </Box>
+        <Stack as="form" onSubmit={onSubmit}>
+          <label htmlFor="name">Player name:</label>
+          <Input
+            placeholder="Enter name"
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e: any) => setName(e.target.value)}
+          />
 
-        <label htmlFor="gameId">Game Id:</label>
-        <input type="text" id="gameId" value={gameId} onChange={(e) => setGameId(e.target.value)} />
+          <label htmlFor="gameId">Game Id:</label>
+          <Input
+            placeholder="Enter Game Id"
+            type="text"
+            id="gameId"
+            value={gameId}
+            onChange={(e: any) => setGameId(e.target.value)}
+          />
 
-        <button type="submit">Join game</button>
-      </form>
-    </>
+          <Button colorScheme="blue" type="submit">
+            Join game
+          </Button>
+        </Stack>
+      </VStack>
+    </Center>
   );
 }

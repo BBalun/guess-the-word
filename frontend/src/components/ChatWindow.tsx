@@ -1,3 +1,4 @@
+import { Box, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { useCustomEventListener } from "../hooks/customEventHook";
 
@@ -15,12 +16,12 @@ export default function ChatWindow() {
   });
 
   return (
-    <div>
+    <Box border="4px" resize="none" disabled={true} height="120px">
       {messeges.map((msg, i) => (
-        <p key={i} style={{ color: msg.wasRight ? "green" : "black" }}>
+        <Text key={i} color={msg.wasRight ? "green" : "black"}>
           {msg.displayMsg}
-        </p>
+        </Text>
       ))}
-    </div>
+    </Box>
   );
 }

@@ -1,3 +1,4 @@
+import { Box } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { useCustomEventListener } from "../hooks/customEventHook";
 
@@ -37,5 +38,9 @@ export default function ReadOnlyCanvas() {
     ctx.fillRect(data.posX, data.posY, 3, 3);
   });
 
-  return <canvas width="500" height="300" ref={canvasRef}></canvas>;
+  return (
+    <Box border="4px">
+      <canvas width="700" height="500" ref={canvasRef}></canvas>
+    </Box>
+  );
 }

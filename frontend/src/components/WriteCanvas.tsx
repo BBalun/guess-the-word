@@ -1,3 +1,4 @@
+import { Box } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 
 export default function WriteCanvas({ socket }: { socket: WebSocket }) {
@@ -45,13 +46,15 @@ export default function WriteCanvas({ socket }: { socket: WebSocket }) {
   };
 
   return (
-    <canvas
-      width="500"
-      height="300"
-      ref={canvas}
-      onMouseMove={draw}
-      // onMouseDown={setPosition}
-      // onMouseEnter={setPosition}
-    ></canvas>
+    <Box border="4px">
+      <canvas
+        width="700"
+        height="500"
+        ref={canvas}
+        onMouseMove={draw}
+        // onMouseDown={setPosition}
+        // onMouseEnter={setPosition}
+      />
+    </Box>
   );
 }

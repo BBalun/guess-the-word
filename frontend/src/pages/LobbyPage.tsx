@@ -1,5 +1,7 @@
+import { Box, Button, Center, Heading, HStack, Stack } from "@chakra-ui/react";
 import { useState } from "react";
 import { useCustomEventListener } from "../hooks/customEventHook";
+import { Text } from "@chakra-ui/react";
 
 function startGame(socket: WebSocket) {
   socket.send(JSON.stringify({ type: "startGame" }));
@@ -20,16 +22,26 @@ export default function LobbyPage({ gameId, players, isOwner, socket }: LobbyPag
   });
 
   return (
-    <div>
-      <h1>Game ID: {gameId}</h1>
-      {lobby.map((name, i) => (
-        <p key={name}>
-          {i}. {name}
-        </p>
-      ))}
-      <button disabled={!isOwner} onClick={() => startGame(socket)}>
-        Start game
-      </button>
-    </div>
+    <Center height="100vh">
+      <Stack>
+        <Heading>Game ID: {gameId}</Heading>
+        <Heading>Players:</Heading>
+        {lobby.map((name, i) => (
+          <HStack key={name}>
+            <Box fontWeight="bold">{i + 1}.</Box>
+            <Box>{name}</Box>
+          </HStack>
+        ))}
+        <Button
+          alignSelf="flex-end"
+          maxWidth="36"
+          colorScheme="blue"
+          disabled={!isOwner}
+          onClick={() => startGame(socket)}
+        >
+          Start game
+        </Button>
+      </Stack>
+    </Center>
   );
 }

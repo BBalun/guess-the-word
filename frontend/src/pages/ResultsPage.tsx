@@ -1,3 +1,5 @@
+import { Center, Heading, Stack } from "@chakra-ui/react";
+
 type ResultsPageProps = {
   results: {
     playerName: string;
@@ -8,15 +10,17 @@ type ResultsPageProps = {
 
 export default function ResultsPage({ results, gameEnded }: ResultsPageProps) {
   return (
-    <div>
-      {gameEnded ? <h1>Final score:</h1> : <h1>Results:</h1>}
-      {results.map((x) => {
-        return (
-          <p key={x.playerName}>
-            {x.playerName}: {x.score}
-          </p>
-        );
-      })}
-    </div>
+    <Center height="100vh">
+      <Stack>
+        <Heading>{gameEnded ? "Final score:" : "Results:"}</Heading>
+        {results.map((x, i) => {
+          return (
+            <Heading key={x.playerName}>
+              {i + 1}. {x.playerName} ({x.score})
+            </Heading>
+          );
+        })}
+      </Stack>
+    </Center>
   );
 }

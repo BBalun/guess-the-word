@@ -48,10 +48,8 @@ pub async fn client_connection(ws: WebSocket, server: Arc<Server>) {
                     let rounds = 3 as u32;
                     let owner = Player::new(player_name, client_sink, true);
                     let game_id = Uuid::new_v4().to_string();
-                    let new_game = Game::new(game_id.clone(), rounds, owner.clone(), server.get_words(), Arc::downgrade(&server));
-                    let new_game = Arc::new(Mutex::new(new_game));
+                    let new_game = Arc::new(Mutex::new(Game::new(game_id.clone(), rounds, owner.clone(), server.get_words(), Arc::downgrade(&server))));
                     server.add_game(new_game.clone()).await;
-                    // let game_id = server.create_game(owner.clone(), 3).await;
                     owner.send(ServerMessage::CreateGameResponse(CreateGameResponseData {
                         game_id: game_id.clone(),
                         player_name: owner.name.clone(),
@@ -119,7 +117,7 @@ pub async fn client_connection(ws: WebSocket, server: Arc<Server>) {
             match client_msg {
                 ClientMessage::StartGame => {
                     let mut game = game.lock().await;
-                    game.start(&player);
+                    game.start(&player).await;
                 }
                 ClientMessage::DrawPixel(data) => {
                     let game = game.lock().await;

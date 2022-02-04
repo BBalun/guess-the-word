@@ -24,18 +24,10 @@ async fn main() {
         .and(with_server(server.clone()))
         .and_then(handlers::ws_handler);
 
-    // GET /timeout/{game_id}/{turn}
-    let timeout_route = warp::get()
-        .and(warp::path("timeout"))
-        .and(warp::path::param())
-        .and(warp::path::param())
-        .and(with_server(server.clone()))
-        .and_then(handlers::timeout_handler);
-
     let routes = ws_route.with(warp::cors().allow_any_origin());
 
     println!("Starting server");
-    warp::serve(routes.or(timeout_route))
+    warp::serve(routes)
         .run(([127, 0, 0, 1], 8000))
         .await;
 }

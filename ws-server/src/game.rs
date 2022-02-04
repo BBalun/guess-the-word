@@ -2,8 +2,8 @@ use std::{
     collections::{HashMap, HashSet},
     sync::{Arc, Weak},
 };
+use async_recursion::async_recursion;
 
-use futures::Future;
 use rand::prelude::SliceRandom;
 
 use crate::{
@@ -137,7 +137,6 @@ impl Game {
     pub async fn start_timeout(&self, timeout: u64) {
         if let GameStatus::InProgress { current_round } = self.game_status {
             if let Some(server) = self.server.upgrade() {
-                // server.start_timeout(&self.id, current_round, timeout).await;
                 let game_id = self.id.clone();
                 tokio::spawn(async move {
                     tokio::time::sleep(tokio::time::Duration::from_secs(timeout)).await;
@@ -147,14 +146,6 @@ impl Game {
                     }
                 });
             }
-            // tokio::spawn(async move {
-            //     tokio::time::sleep(tokio::time::Duration::from_secs(timeout)).await;
-            //     let _ = reqwest::get(format!(
-            //         "http://127.0.0.1:8000/timeout/{}/{}",
-            //         id, current_round
-            //     ))
-            //     .await;
-            // });
         }
     }
 
@@ -209,6 +200,7 @@ impl Game {
     }
 
     /// Ends a turns. If turn was a last, ends a game instead.
+    #[async_recursion]
     pub async fn end_turn(&mut self) {
         if let GameStatus::InProgress { current_round } = self.game_status {
             self.players_that_guessed_right.clear();
@@ -230,10 +222,8 @@ impl Game {
             self.send_to_all(&ServerMessage::TurnEnded { results });
 
             // Wait 3 seconds and start next turn
-            tokio::spawn(async move {
-                tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
-                self.start_turn().await;
-            });
+            tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
+            self.start_turn().await;
         }
     }
 

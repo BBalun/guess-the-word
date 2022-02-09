@@ -23,7 +23,7 @@ pub struct Game {
     pub words: Arc<Vec<String>>,
     pub current_word: String,
     server: Weak<Server>,
-    pub round_length: u64,
+    pub round_length: u32,
 }
 
 pub enum GameStatus {
@@ -39,7 +39,7 @@ impl Game {
         mut owner: Player,
         words: Arc<Vec<String>>,
         server: Weak<Server>,
-        round_length: u64,
+        round_length: u32,
     ) -> Game {
         let mut players = HashMap::new();
         owner.is_owner = true;
@@ -78,7 +78,7 @@ impl Game {
         self.players.insert(player.name.clone(), player.clone());
 
         // send response to a player
-        let lobby: Vec<String> = self.players.keys().map(|name| name.clone()).collect();
+        let lobby: Vec<String> = self.players.keys().cloned().collect();
         player.send(ServerMessage::JoinGameResponse(JoinGameResponseData {
             error_msg: None,
             lobby: Some(lobby.clone()),
@@ -88,7 +88,7 @@ impl Game {
         // update lobby of all other players
         self.send_to_all_except(&ServerMessage::LobbyChanged { lobby }, &player);
 
-        return true;
+        true
     }
 
     /// returns true if a game already started or is finished
@@ -132,24 +132,26 @@ impl Game {
             None => return,
         };
         self.current_word = self.get_random_word();
-        current_player.send(ServerMessage::YourTurn {
+        current_player.send(ServerMessage::YourTurn(YourTurnData {
             word: self.get_current_word(),
-        });
+            round_length: self.round_length,
+        }));
         self.send_to_all_except(
             &ServerMessage::TurnStarted(TurnStartedData {
                 player_name: current_player.name.clone(),
+                round_length: self.round_length,
             }),
             &current_player,
         );
         self.start_timeout(self.round_length).await;
     }
 
-    pub async fn start_timeout(&self, timeout: u64) {
+    pub async fn start_timeout(&self, timeout: u32) {
         if let GameStatus::InProgress { current_round } = self.game_status {
             if let Some(server) = self.server.upgrade() {
                 let game_id = self.id.clone();
                 tokio::spawn(async move {
-                    tokio::time::sleep(tokio::time::Duration::from_secs(timeout)).await;
+                    tokio::time::sleep(tokio::time::Duration::from_secs(timeout as u64)).await;
                     if let Some(game) = server.find_game(&game_id).await {
                         let mut game = game.lock().await;
                         game.timeout(current_round).await;
@@ -164,7 +166,7 @@ impl Game {
         match self.game_status {
             GameStatus::InProgress { current_round } => {
                 let key = &self.player_order[current_round];
-                self.players.get(key).map(|p| p.clone())
+                self.players.get(key).cloned()
             }
             _ => None,
         }
@@ -173,8 +175,8 @@ impl Game {
     pub fn get_random_word(&self) -> String {
         self.words
             .choose(&mut rand::thread_rng())
-            .map(|word| word.clone())
-            .unwrap_or("No words".to_string())
+            .cloned()
+            .unwrap_or_else(|| "No words".to_string())
     }
 
     pub fn get_current_word(&self) -> String {
@@ -219,7 +221,7 @@ impl Game {
                 .iter()
                 .map(|(name, points)| PlayerScore {
                     player_name: name.clone(),
-                    score: points.clone(),
+                    score: *points,
                 })
                 .collect();
             if self.get_number_of_rounds() == current_round + 1 {
@@ -271,10 +273,7 @@ impl Game {
     }
 
     pub fn contains_player(&self, player_name: &str) -> bool {
-        match self.players.get(player_name) {
-            Some(_) => true,
-            None => false,
-        }
+        self.players.get(player_name).is_some()
     }
 
     pub async fn timeout(&mut self, round: usize) {

@@ -17,7 +17,7 @@ pub enum ClientMessage {
 pub struct CreateGameData {
     pub player_name: String,
     pub number_of_rounds: u32,
-    pub round_length: u64,
+    pub round_length: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

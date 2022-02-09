@@ -26,6 +26,7 @@ export type TurnStarted = {
   type: "turnStarted";
   content: {
     playerName: string;
+    roundLength: number;
   };
 };
 
@@ -33,6 +34,7 @@ export type YourTurn = {
   type: "yourTurn";
   content: {
     word: string;
+    roundLength: number;
   };
 };
 

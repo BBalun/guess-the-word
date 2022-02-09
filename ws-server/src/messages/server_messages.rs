@@ -9,7 +9,7 @@ pub enum ServerMessage {
     JoinGameResponse(JoinGameResponseData),
     LobbyChanged { lobby: Vec<String> },
     TurnStarted(TurnStartedData),
-    YourTurn { word: String },
+    YourTurn(YourTurnData),
     DrawPixelResponse(DrawPixelData),
     GuessWordResponse(GuessWordResponseData),
     TurnEnded { results: Vec<PlayerScore> },
@@ -35,6 +35,7 @@ pub struct JoinGameResponseData {
 #[serde(rename_all = "camelCase")]
 pub struct TurnStartedData {
     pub player_name: String,
+    pub round_length: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -55,5 +56,6 @@ pub struct PlayerScore {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct YourTurnData {
-    pub player_name: String,
+    pub word: String,
+    pub round_length: u32,
 }

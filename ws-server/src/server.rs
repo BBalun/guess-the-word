@@ -28,6 +28,6 @@ impl Server {
 
     pub async fn find_game(&self, game_id: &str) -> Option<Arc<Mutex<Game>>> {
         let games = self.games.read().await;
-        games.get(game_id).map(|game| game.clone())
+        games.get(game_id).cloned()
     }
 }

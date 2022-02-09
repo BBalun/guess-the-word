@@ -40,7 +40,7 @@ async fn read_words(file_path: &str) -> Vec<String> {
     let mut res = Vec::new();
     let file = File::open(file_path)
         .await
-        .expect(&format!("File `{}` does not exist.", file_path));
+        .unwrap_or_else(|_| panic!("File `{}` does not exist.", file_path));
     let reader = BufReader::new(file);
     let mut lines = reader.lines();
 

@@ -37,7 +37,7 @@ pub async fn client_connection(ws: WebSocket, server: Arc<Server>) {
         if msg.is_text() {
             let msg = msg.to_str().unwrap();
 
-            let client_msg: ClientMessage = match serde_json::from_str(&msg) {
+            let client_msg: ClientMessage = match serde_json::from_str(msg) {
                 Ok(res) => res,
                 _ => {
                     continue;
@@ -95,7 +95,7 @@ pub async fn client_connection(ws: WebSocket, server: Arc<Server>) {
                         }
                     }
                 }
-                _ => { }
+                _ => {}
             }
         }
     }
@@ -120,7 +120,7 @@ pub async fn client_connection(ws: WebSocket, server: Arc<Server>) {
         if msg.is_text() {
             let msg = msg.to_str().unwrap();
 
-            let client_msg: ClientMessage = match serde_json::from_str(&msg) {
+            let client_msg: ClientMessage = match serde_json::from_str(msg) {
                 Ok(res) => res,
                 _ => continue,
             };
@@ -140,7 +140,7 @@ pub async fn client_connection(ws: WebSocket, server: Arc<Server>) {
                 }
                 _ => {}
             };
-        } 
+        }
     }
 
     println!("connection closed");

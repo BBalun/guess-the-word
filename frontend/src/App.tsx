@@ -46,10 +46,10 @@ function App() {
           );
           break;
         case "turnStarted":
-          setPage(<GuessingPage socket={socket} />);
+          setPage(<GuessingPage socket={socket} roundLength={data.content.roundLength} />);
           break;
         case "yourTurn":
-          setPage(<DrawingPage socket={socket} word={data.content.word} />);
+          setPage(<DrawingPage socket={socket} word={data.content.word} roundLength={data.content.roundLength} />);
           break;
         case "gameEnded":
           setPage(<ResultsPage results={data.content.results} gameEnded={true} />);
